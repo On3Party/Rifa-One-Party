@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rifa · One Party</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+  *{box-sizing:border-box;margin:0;padding:0}
+
+  :root{
+    --bg:#0f0f12;
+    --surface:#1a1a21;
+    --surface2:#22222c;
+    --pink:#ff2d78;
+    --purple:#7c3aed;
+    --grad:linear-gradient(135deg,#7c3aed,#ff2d78);
+    --text:#ffffff;
+    --text2:#a0a0b0;
+    --green:#22c55e;
+    --green-bg:#052e16;
+    --red:#ef4444;
+    --red-bg:#2d0a0a;
+    --radius:10px;
+  }
+
+  body{
+    font-family:'Inter',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+  }
+
+  /* HEADER */
+  header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:1rem 1.5rem;
+    border-bottom:1px solid #ffffff10;
+    background:var(--bg);
+    position:sticky;
+    top:0;
+    z-index:5;
+  }
+  .logo{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .logo svg{width:32px;height:32px}
+  .logo-text{font-size:20px;font-weight:700;letter-spacing:-0.5px}
+  .logo-text span{color:var(--pink)}
+
+  /* STATS BAR */
+  .stats{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    padding:1rem 1.5rem;
+    border-bottom:1px solid #ffffff08;
+  }
+  .stat{
+    flex:1;
+    min-width:120px;
+    background:var(--surface);
+    border-radius:var(--radius);
+    padding:0.75rem 1rem;
+  }
+  .stat-label{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px}
+  .stat-val{font-size:22px;font-weight:700}
+  .stat-val.green{color:var(--green)}
+  .stat-val.red{color:var(--red)}
+  .stat-val.grad{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+  /* CONTROLS */
+  .controls{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    padding:1rem 1.5rem;
+    align-items:center;
+  }
+  .search{
+    flex:1;
+    min-width:180px;
+    background:var(--surface);
+    border:1px solid #ffffff15;
+    border-radius:var(--radius);
+    padding:8px 14px;
+    color:var(--text);
+    font-size:14px;
+    font-family:'Inter',sans-serif;
+    outline:none;
+  }
+  .search:focus{border-color:#ffffff35}
+  .search::placeholder{color:var(--text2)}
+  .filters{display:flex;gap:6px;flex-wrap:wrap}
+  .fbtn{
+    padding:7px 14px;
+    border-radius:var(--radius);
+    border:1px solid #ffffff20;
+    background:transparent;
+    color:var(--text2);
+    font-size:13px;
+    font-family:'Inter',sans-serif;
+    cursor:pointer;
+    transition:all 0.15s;
+  }
+  .fbtn:hover{background:var(--surface);color:var(--text)}
+  .fbtn.active{background:var(--grad);border-color:transparent;color:#fff;font-weight:500}
+  .btn-export{
+    padding:7px 16px;
+    border-radius:var(--radius);
+    border:1px solid var(--pink);
+    background:transparent;
+    color:var(--pink);
+    font-size:13px;
+    font-family:'Inter',sans-serif;
+    cursor:pointer;
+    font-weight:500;
+    transition:all 0.15s;
+  }
+  .btn-export:hover{background:var(--pink);color:#fff}
+
+  /* CONFIG BANNER */
+  .config-banner{
+    margin:0 1.5rem 0;
+    background:#1a1228;
+    border:1px solid #7c3aed50;
+    border-radius:var(--radius);
+    padding:12px 16px;
+    font-size:13px;
+    color:#c4b5fd;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .config-banner strong{color:#fff}
+  .config-banner a{color:var(--pink);text-decoration:none}
+  .config-banner a:hover{text-decoration:underline}
+  #status-dot{width:8px;height:8px;border-radius:50%;background:#888;flex-shrink:0}
+  #status-dot.connected{background:var(--green)}
+  #status-dot.error{background:var(--red)}
+
+  /* GRID */
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(54px,1fr));
+    gap:5px;
+    padding:1rem 1.5rem 2rem;
+  }
+  .boleta{
+    aspect-ratio:1;
+    border-radius:8px;
+    border:none;
+    font-size:12px;
+    font-weight:600;
+    font-family:'Inter',sans-serif;
+    cursor:pointer;
+    transition:transform 0.1s,opacity 0.1s;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .boleta:hover{transform:scale(1.08);opacity:0.85}
+  .boleta:active{transform:scale(0.96)}
+  .boleta.disp{
+    background:var(--green-bg);
+    color:var(--green);
+    border:1px solid #15803d60;
+  }
+  .boleta.vend{
+    background:var(--red-bg);
+    color:var(--red);
+    border:1px solid #991b1b60;
+  }
+
+  /* MODAL */
+  .modal-bg{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.7);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:50;
+    padding:1rem;
+    backdrop-filter:blur(4px);
+  }
+  .modal{
+    background:var(--surface);
+    border:1px solid #ffffff15;
+    border-radius:16px;
+    padding:1.5rem;
+    width:100%;
+    max-width:340px;
+  }
+  .modal-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:1.25rem;
+  }
+  .modal-title{font-size:18px;font-weight:700}
+  .modal-num{
+    font-size:28px;
+    font-weight:700;
+    background:var(--grad);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    background-clip:text;
+  }
+  .modal-badge{
+    font-size:12px;
+    padding:3px 10px;
+    border-radius:20px;
+    font-weight:500;
+  }
+  .badge-disp{background:var(--green-bg);color:var(--green);border:1px solid #15803d60}
+  .badge-vend{background:var(--red-bg);color:var(--red);border:1px solid #991b1b60}
+  .modal label{
+    display:block;
+    font-size:12px;
+    color:var(--text2);
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+    margin:14px 0 5px;
+  }
+  .modal input{
+    width:100%;
+    background:var(--surface2);
+    border:1px solid #ffffff15;
+    border-radius:8px;
+    padding:9px 12px;
+    color:var(--text);
+    font-size:14px;
+    font-family:'Inter',sans-serif;
+    outline:none;
+  }
+  .modal input:focus{border-color:#ffffff35}
+  .modal input::placeholder{color:#555}
+  .modal-actions{display:flex;gap:8px;margin-top:1.25rem;flex-wrap:wrap}
+  .modal-actions button{
+    flex:1;
+    min-width:90px;
+    padding:9px 0;
+    border-radius:8px;
+    border:none;
+    font-size:13px;
+    font-weight:600;
+    font-family:'Inter',sans-serif;
+    cursor:pointer;
+    transition:opacity 0.15s;
+  }
+  .modal-actions button:hover{opacity:0.85}
+  .btn-vender{background:var(--red);color:#fff}
+  .btn-liberar{background:var(--green);color:#fff}
+  .btn-guardar{background:var(--grad);color:#fff}
+  .btn-cerrar{background:var(--surface2);color:var(--text2)}
+
+  /* SETUP FORM */
+  #setup-screen{
+    max-width:480px;
+    margin:4rem auto;
+    padding:1.5rem;
+  }
+  #setup-screen h2{font-size:22px;font-weight:700;margin-bottom:0.5rem}
+  #setup-screen p{font-size:14px;color:var(--text2);margin-bottom:1.5rem;line-height:1.6}
+  #setup-screen input{
+    width:100%;
+    background:var(--surface);
+    border:1px solid #ffffff20;
+    border-radius:var(--radius);
+    padding:10px 14px;
+    color:var(--text);
+    font-size:13px;
+    font-family:'Inter',sans-serif;
+    outline:none;
+    margin-bottom:8px;
+  }
+  #setup-screen input:focus{border-color:var(--purple)}
+  #setup-screen input::placeholder{color:#555}
+  #setup-screen label{font-size:12px;color:var(--text2);display:block;margin-bottom:4px;margin-top:10px;text-transform:uppercase;letter-spacing:0.5px}
+  .btn-connect{
+    width:100%;
+    margin-top:1rem;
+    padding:11px;
+    border-radius:var(--radius);
+    border:none;
+    background:var(--grad);
+    color:#fff;
+    font-size:15px;
+    font-weight:600;
+    font-family:'Inter',sans-serif;
+    cursor:pointer;
+  }
+  .setup-hint{font-size:12px;color:var(--text2);margin-top:10px;line-height:1.5}
+  .setup-hint a{color:var(--pink)}
+
+  .hidden{display:none}
+</style>
+</head>
+<body>
+
+
+
+<!-- APP SCREEN -->
+<div id="app-screen">
+  <header>
+    <div class="logo">
+      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#7c3aed"/>
+            <stop offset="100%" stop-color="#ff2d78"/>
+          </linearGradient>
+        </defs>
+        <path d="M15 20 L50 65 L85 20 Z" stroke="url(#g2)" stroke-width="5" fill="none" stroke-linejoin="round"/>
+        <path d="M50 65 L50 85" stroke="url(#g2)" stroke-width="5" stroke-linecap="round"/>
+        <path d="M35 85 L65 85" stroke="url(#g2)" stroke-width="5" stroke-linecap="round"/>
+      </svg>
+      <span class="logo-text">one <span>party</span></span>
+    </div>
+    <div style="font-size:13px;color:var(--text2)">Rifa · Paseo de grado</div>
+  </header>
+
+  <div class="config-banner">
+    <div id="status-dot"></div>
+    <span id="status-text">Conectando con Firebase...</span>
+  </div>
+
+  <div class="stats" style="margin-top:1rem">
+    <div class="stat">
+      <div class="stat-label">Disponibles</div>
+      <div class="stat-val green" id="s-disp">—</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Vendidas</div>
+      <div class="stat-val red" id="s-vend">—</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Recaudado</div>
+      <div class="stat-val grad" id="s-total">—</div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <input class="search" type="text" id="search" placeholder="Buscar número o nombre..." oninput="renderGrid()">
+    <div class="filters">
+      <button class="fbtn active" onclick="setFiltro('todos',this)">Todos</button>
+      <button class="fbtn" onclick="setFiltro('disp',this)">Disponibles</button>
+      <button class="fbtn" onclick="setFiltro('vend',this)">Vendidos</button>
+    </div>
+    <button class="btn-export" onclick="exportarExcel()">⬇ Exportar Excel</button>
+  </div>
+
+  <div class="grid" id="grid"></div>
+</div>
+
+<!-- MODAL -->
+<div id="modal-container"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script type="module">
+const TOTAL = 1000;
+const PRECIO = 2000;
+let estado = {};
+let filtro = 'todos';
+let db = null;
+let unsubscribe = null;
+
+function pad(n){ return String(n).padStart(3,'0'); }
+
+window.conectar = async function(){
+  const cfg = {
+    apiKey: "AIzaSyAXAuAKXD97_gJ1CqfoWycx4Maou7FKYCU",
+    authDomain: "one-party-b7c12.firebaseapp.com",
+    projectId: "one-party-b7c12",
+    storageBucket: "one-party-b7c12.firebasestorage.app",
+    messagingSenderId: "631412810109",
+    appId: "1:631412810109:web:6f83d6c11c382aab55ac14",
+  };
+  if(!cfg.apiKey || !cfg.projectId){
+    alert('Por favor completa al menos API Key y Project ID.');
+    return;
+  }
+  try {
+    const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
+    const { getFirestore, doc, setDoc, onSnapshot, collection } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+
+    const app = initializeApp(cfg);
+    db = getFirestore(app);
+
+  
+    document.getElementById('status-text').textContent = 'Conectando...';
+
+    const colRef = collection(db, 'boletas');
+
+    // Escucha cambios en tiempo real
+    unsubscribe = onSnapshot(colRef, (snapshot) => {
+      snapshot.docChanges().forEach(change => {
+        const data = change.doc.data();
+        const num = parseInt(change.doc.id);
+        if(change.type === 'removed'){
+          delete estado[num];
+        } else {
+          estado[num] = data;
+        }
+      });
+      actualizarStats();
+      renderGrid();
+      const dot = document.getElementById('status-dot');
+      dot.className = 'connected';
+      document.getElementById('status-text').textContent = 'Conectado — cambios en tiempo real para todos';
+    }, (err) => {
+      document.getElementById('status-dot').className = 'error';
+      document.getElementById('status-text').textContent = 'Error de conexión: ' + err.message;
+    });
+
+    window._db = db;
+    window._setDoc = setDoc;
+    window._doc = doc;
+
+  } catch(e){
+    alert('Error al conectar: ' + e.message);
+  }
+};
+
+window.setFiltro = function(f, btn){
+  filtro = f;
+  document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderGrid();
+};
+
+window.renderGrid = function(){
+  const q = (document.getElementById('search').value || '').toLowerCase().trim();
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  for(let i = 0; i < TOTAL; i++){
+    const b = estado[i] || {vendido: false, nombre:'', tel:''};
+    const numStr = pad(i);
+    if(q && !numStr.includes(q) && !(b.nombre||'').toLowerCase().includes(q)) continue;
+    if(filtro === 'disp' && b.vendido) continue;
+    if(filtro === 'vend' && !b.vendido) continue;
+    const el = document.createElement('button');
+    el.className = 'boleta ' + (b.vendido ? 'vend' : 'disp');
+    el.textContent = numStr;
+    el.title = b.vendido ? `${b.nombre} | ${b.tel}` : 'Disponible';
+    el.onclick = () => abrirModal(i);
+    grid.appendChild(el);
+  }
+};
+
+function actualizarStats(){
+  let vend = 0;
+  for(let i=0;i<TOTAL;i++){ if((estado[i]||{}).vendido) vend++; }
+  document.getElementById('s-disp').textContent = (TOTAL - vend);
+  document.getElementById('s-vend').textContent = vend;
+  document.getElementById('s-total').textContent = '$' + (vend * PRECIO).toLocaleString('es-CO');
+}
+
+window.abrirModal = function(num){
+  const b = estado[num] || {vendido:false, nombre:'', tel:''};
+  const mc = document.getElementById('modal-container');
+  mc.innerHTML = `
+  <div class="modal-bg" onclick="if(event.target===this)cerrarModal()">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <div style="font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Boleta</div>
+          <div class="modal-num">#${pad(num)}</div>
+        </div>
+        <span class="modal-badge ${b.vendido ? 'badge-vend' : 'badge-disp'}">${b.vendido ? 'Vendida' : 'Disponible'}</span>
+      </div>
+      <label>Nombre del comprador</label>
+      <input type="text" id="m-nombre" value="${b.nombre||''}" placeholder="Nombre completo">
+      <label>Teléfono</label>
+      <input type="text" id="m-tel" value="${b.tel||''}" placeholder="Ej: 300 123 4567">
+      <div class="modal-actions">
+        ${!b.vendido ? `<button class="btn-vender" onclick="marcar(${num},true)">Marcar vendida</button>` : ''}
+        ${b.vendido ? `<button class="btn-liberar" onclick="marcar(${num},false)">Marcar disponible</button>` : ''}
+        <button class="btn-guardar" onclick="guardarInfo(${num})">Guardar</button>
+        <button class="btn-cerrar" onclick="cerrarModal()">Cerrar</button>
+      </div>
+    </div>
+  </div>`;
+};
+
+window.cerrarModal = function(){ document.getElementById('modal-container').innerHTML=''; };
+
+window.marcar = async function(num, vendido){
+  const nombre = document.getElementById('m-nombre').value.trim();
+  const tel = document.getElementById('m-tel').value.trim();
+  const data = {vendido, nombre, tel, num};
+  await window._setDoc(window._doc(window._db,'boletas',String(num)), data);
+  cerrarModal();
+};
+
+window.guardarInfo = async function(num){
+  const nombre = document.getElementById('m-nombre').value.trim();
+  const tel = document.getElementById('m-tel').value.trim();
+  const b = estado[num] || {};
+  const data = {vendido: b.vendido||false, nombre, tel, num};
+  await window._setDoc(window._doc(window._db,'boletas',String(num)), data);
+  cerrarModal();
+};
+
+// Auto-conectar al abrir
+conectar();
+
+window.exportarExcel = function(){
+  const vend=[], disp=[];
+  for(let i=0;i<TOTAL;i++){
+    const b = estado[i]||{};
+    if(b.vendido) vend.push({Numero:pad(i), Estado:'Vendida', Nombre:b.nombre||'', Telefono:b.tel||''});
+    else disp.push({Numero:pad(i), Estado:'Disponible', Nombre:'', Telefono:''});
+  }
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(vend), 'Vendidas');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(disp), 'Disponibles');
+  XLSX.writeFile(wb, 'rifa_oneparty.xlsx');
+};
+</script>
+</body>
+</html>
